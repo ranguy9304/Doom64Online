@@ -12,6 +12,7 @@ from sound import *
 from pathfinding import *
 import socket
 import json
+import pickle
 class Cli_updates:
     position=[1,0]
     yaw=0
@@ -22,11 +23,13 @@ class Cli_updates:
         self.shoot=shoot
 
     def getJson(self):
-        print(self.__dict__)
+        # print(self.__dict__)
         return json.dumps(self.__dict__)
 class Game:
     s=None # SOCKET CONNECTOR
-    def __init__(self):
+    def __init__(self,s,x,y):
+    # def __init__(self,x,y):
+
         pg.init()
         pg.mouse.set_visible(False)
         self.screen = pg.display.set_mode(RES)
@@ -36,12 +39,13 @@ class Game:
         self.global_trigger = False
         self.global_event = pg.USEREVENT + 0
         pg.time.set_timer(self.global_event, 40)
-        self.new_game()
+        self.s=s
+        self.new_game(x,y)
 
 
-    def new_game(self):
+    def new_game(self,x,y):
         self.map = Map(self)
-        self.player = Player(self)
+        self.player = Player(self,x,y)
         self.object_renderer = ObjectRenderer(self)
         self.raycasting = RayCasting(self)
         self.object_handler = ObjectHandler(self)
@@ -60,6 +64,10 @@ class Game:
         encoded_msg=bytes(msg, "utf-8")
 
         self.s.send(encoded_msg)
+        # data = s.recv(1024)
+        # decoded_data = data.decode("utf-8")
+        # player_data=pickle.loads(data)
+        print(decoded_data)
         self.weapon.update()
         pg.display.flip()
         
@@ -84,20 +92,7 @@ class Game:
             self.player.single_fire_event(event)
 
     def run(self):
-        host="127.0.0.1"
-        port=7000
-        self.s=socket.socket()
-        print("---Connected to server---")
-        self.s.connect((host, port))
-        msg="spawn init"
-
-        encoded_msg=bytes(msg, "utf-8")
-
-        self.s.send(encoded_msg)
-        data = self.s.recv(1024)
-        decoded_data = data.decode("utf-8")
-        spawn_location=json.loads(decoded_data)
-        print(spawn_location)
+        
         while True:
             self.check_events()
             self.update()
@@ -105,5 +100,24 @@ class Game:
 
 
 if __name__ == '__main__':
-    game = Game()
+    host="127.0.0.1"
+    port=7000
+    s=socket.socket()
+    print("---Connected to server---")
+    s.connect((host, port))
+    msg="spawn init"
+
+    encoded_msg=bytes(msg, "utf-8")
+
+    s.send(encoded_msg)
+    data = s.recv(1024)
+    decoded_data = data.decode("utf-8")
+    spawn_location=json.loads(decoded_data)
+    print(spawn_location)
+    
+    # self.player.x=spawn_location["x"]
+    # self.player.y=spawn_location["y"]
+    game = Game(s,spawn_location["x"],spawn_location["y"])
+    # game = Game(1,1)
+
     game.run()

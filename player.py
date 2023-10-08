@@ -1,12 +1,12 @@
 from settings import *
 import pygame as pg
 import math
-
+import json
 
 class Player:
-    def __init__(self, game):
+    def __init__(self, game,x,y):
         self.game = game
-        self.x, self.y = PLAYER_POS
+        self.x, self.y = x,y
         self.angle = PLAYER_ANGLE
         self.shot = False
         self.health = PLAYER_MAX_HEALTH
@@ -31,7 +31,15 @@ class Player:
             self.game.object_renderer.game_over()
             pg.display.flip()
             pg.time.delay(1500)
-            self.game.new_game()
+            msg="spawn init"
+
+            encoded_msg=bytes(msg, "utf-8")
+
+            self.game.s.send(encoded_msg)
+            data = self.game.s.recv(1024)
+            decoded_data = data.decode("utf-8")
+            spawn_location=json.loads(decoded_data)
+            self.game.new_game(spawn_location['x'],spawn_location['y'])
 
     def get_damage(self, damage):
         self.health -= damage

@@ -51,6 +51,10 @@ class Map:
             for i, value in enumerate(row):
                 if value:
                     self.world_map[(i, j)] = value
+    
+    # @property
+    # def map_siz(self):
+    #     return len(self.mini_map),len(self.mini_map[0])
 
     # def draw(self):
         # [pg.draw.rect(self.game.screen, 'darkgray', (pos[0] * 100, pos[1] * 100, 100, 100), 2)

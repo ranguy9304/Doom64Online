@@ -2,6 +2,8 @@ import os
 import socket
 import json
 from map import *
+import random
+import pickle
 host = "127.0.0.1"
 port = 7000
 s = socket.socket()
@@ -20,6 +22,13 @@ class Game_State:
 		self.running=running
 		self.players=players
 		self.map_obj=map_obj
+	def get_players_json(self,id):
+		temp={}
+		for i , player in self.players.items():
+			temp[str(i)]=str(player.__dict__)
+		temp[str(-1)]=str(id)
+		return json.dumps(temp,indent=1)
+		
 	def ray_cast_player_npc(self,id):
 		if self.players[id].position == self.map_pos:
 			return True
@@ -91,11 +100,12 @@ class Game_State:
     #                      (100 * self.x, 100 * self.y), 2)
 map_obj=Map(None)
 map_obj.get_map()
-game_state=Game_State()
+game_state=Game_State(map_obj=map_obj)
 class Player:
 	position=[0,0]
 	yaw=0
 	shoot=False
+	health = 100
 	def __init__(self,position=[0,0],yaw=0,shoot=False):
 		self.position=position
 		self.yaw=yaw
@@ -117,19 +127,32 @@ def handle_client(s, addr, i):
 			print("\nconnection with client " + str(i) + " broken\n")
 			break
 		if decoded_data=="spawn init":
-			msg='{ "x" : 10 ,"y":10 }'
+			x_spawn=random.randrange(1,game_state.map_obj.rows-1,1)
+			y_spawn=random.randrange(1,game_state.map_obj.cols-1,1)
+			msg='{ "x" : '+str(x_spawn)+' ,"y": '+str(y_spawn)+' }'
 
 			encoded_msg=bytes(msg, "utf-8")
 
 			s.send(encoded_msg)		
 		else:
-
+		
 			player_data=json.loads(decoded_data)
 			game_state.players[i].update(player_data["position"],player_data["yaw"],player_data["shoot"])
 			if(game_state.players[i].shoot):
 				print("player "+str(i)+" shot")
 				
 			print(game_state.players[i])
+			msg=pickle.dumps(game_state)
+			# msg='helo'
+
+			# encoded_msg=bytes(msg, "utf-8")
+
+			s.send(encoded_msg)		
+			# print(msg)
+			# encoded_msg=bytes(msg, "utf-8")
+			# self.s.send(encoded_msg)
+			
+			
 
 
 
