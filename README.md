@@ -13,6 +13,7 @@ This project involves recreating the iconic DOOM 64-style game, while also imple
 - Client-Side Rendering for Smooth Graphics.
 - Comprehensive Server Game State Management, Including Player Health, Position, and Shooting Data.
 - once a player dies they will have option to spawn again or leave game.
+- Dynamic player limit set after analysing network traffic.
 
 ## Design
 
