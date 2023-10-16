@@ -1,5 +1,5 @@
-from sprite_object import *
-from npc import *
+from sprite_handels.sprite_object import *
+from sprite_handels.npc import *
 from random import choices, randrange
 
 

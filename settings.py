@@ -1,7 +1,7 @@
 import math
 
 # game settings
-RES = WIDTH, HEIGHT = 1920, 1080
+RES = WIDTH, HEIGHT = 860, 540
 # RES = WIDTH, HEIGHT = 1920, 1080
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
@@ -33,3 +33,15 @@ SCALE = WIDTH // NUM_RAYS
 
 TEXTURE_SIZE = 256
 HALF_TEXTURE_SIZE = TEXTURE_SIZE // 2
+
+HOST = "127.0.0.1"
+PORT = 7000
+
+LOGIN_REQ ="login req"
+PLAYER_UPDATE ="player update"
+GAME_STATE ="game state"
+LOGIN_RES =  "login res"
+
+CLIENT_CLOSED = "client closed"
+
+RECIEVE_BUFFER_SIZE = 4096

@@ -1,18 +1,23 @@
 import pygame as pg
 import sys
 from settings import *
-from map import *
-from player import *
-from raycasting import *
-from object_renderer import *
-from sprite_object import *
-from object_handler import *
-from weapon import *
-from sound import *
-from pathfinding import *
+from render_handels.map import *
+from player_handels.player import *
+from render_handels.raycasting import *
+from render_handels.object_renderer import *
+from sprite_handels.sprite_object import *
+from sprite_handels.object_handler import *
+from sprite_handels.weapon import *
+from sprite_handels.sound import *
+from render_handels.pathfinding import *
+# from server.server_classes import *
+from connection_handels.client_classes import *
+from connection_handels.msg_classes import *
 import socket
 import json
 import pickle
+
+# playerId=None
 class Cli_updates:
     position=[1,0]
     yaw=0
@@ -26,7 +31,7 @@ class Cli_updates:
         # print(self.__dict__)
         return json.dumps(self.__dict__)
 class Game:
-    s=None # SOCKET CONNECTOR
+    connector=None # SOCKET CONNECTOR
     def __init__(self,s,x,y):
     # def __init__(self,x,y):
 
@@ -39,7 +44,7 @@ class Game:
         self.global_trigger = False
         self.global_event = pg.USEREVENT + 0
         pg.time.set_timer(self.global_event, 40)
-        self.s=s
+        self.connector=s
         self.new_game(x,y)
 
 
@@ -58,16 +63,22 @@ class Game:
         self.player.update()
         self.raycasting.update()
         self.object_handler.update()
-        obj=Cli_updates([self.player.map_pos],self.player.angle,self.player.shot)
-        msg=obj.getJson()
+        # print("1")
+        global playerId
+        obj=DataPlayer([self.player.map_pos],self.player.angle,self.player.shot)
+        serGameState = self.connector.playerUpdate(obj)
+        serGameState.show(playerId)
+        # msg=obj.getJson()
+        # print("2 "+msg)
+        # encoded_msg=bytes(msg, "utf-8")
 
-        encoded_msg=bytes(msg, "utf-8")
-
-        self.s.send(encoded_msg)
-        # data = s.recv(1024)
-        # decoded_data = data.decode("utf-8")
+        # self.s.send(encoded_msg)
+        # print("3")
+        # data = s.recv(4096)
+        # # decoded_data = data.decode("utf-8")
         # player_data=pickle.loads(data)
-        print(decoded_data)
+        # player_data.show()
+        # a=SerPlayer()
         self.weapon.update()
         pg.display.flip()
         
@@ -100,24 +111,14 @@ class Game:
 
 
 if __name__ == '__main__':
-    host="127.0.0.1"
-    port=7000
-    s=socket.socket()
+
+    connector = ClientCon()
     print("---Connected to server---")
-    s.connect((host, port))
-    msg="spawn init"
 
-    encoded_msg=bytes(msg, "utf-8")
-
-    s.send(encoded_msg)
-    data = s.recv(1024)
-    decoded_data = data.decode("utf-8")
-    spawn_location=json.loads(decoded_data)
-    print(spawn_location)
-    
-    # self.player.x=spawn_location["x"]
-    # self.player.y=spawn_location["y"]
-    game = Game(s,spawn_location["x"],spawn_location["y"])
+    spawn_location = connector.login()
+    global playerId 
+    playerId= spawn_location[2]
+    game = Game(connector,spawn_location[0],spawn_location[1])
     # game = Game(1,1)
 
     game.run()
