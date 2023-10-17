@@ -119,8 +119,10 @@ class MultiCliCon:
 		return self.recvMsg
 	def loginAccepted(self,map_obj):
 		self.sendMsg=JsonPacket()
-		x_spawn=random.randrange(1,map_obj.rows-1,1)
-		y_spawn=random.randrange(1,map_obj.cols-1,1)
+		# x_spawn=random.randrange(1,map_obj.rows-1,1)
+		# y_spawn=random.randrange(1,map_obj.cols-1,1)
+		x_spawn=1
+		y_spawn=2
 		print(x_spawn,y_spawn)
 		res= LoginResMsg(x_spawn,y_spawn,self.playerId)
 		self.sendMsg=self.sendMsg.loginRes(res)

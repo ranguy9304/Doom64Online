@@ -52,6 +52,7 @@ class ClientJsonCon:
 
         self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
         self.revMsg = json.loads(self.revMsg)
+        self.revMsg = JsonPacket(self.revMsg["type"], self.revMsg["msg"])
         return self.revMsg
 
         

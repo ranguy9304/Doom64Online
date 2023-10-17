@@ -47,7 +47,7 @@ class JsonPacket:
 		self.msg=game_state.getJson()
 		return self.getJson()
 	def getJson(self):
-		print(json.dumps(self.__dict__))
+		# print(json.dumps(self.__dict__))
 		return json.dumps(self.__dict__)
 
 	

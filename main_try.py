@@ -17,7 +17,7 @@ import socket
 import json
 import pickle
 
-# playerId=None
+playerId=None
 class Cli_updates:
     position=[1,0]
     yaw=0
@@ -68,8 +68,14 @@ class Game:
         obj=DataPlayer([self.player.map_pos],self.player.angle,self.player.shot)
         
         game_state_res=self.connector.playerUpdate(obj)
-        print(game_state_res)
-
+        for i in game_state_res.msg:
+            # print(type(i))
+            if i != str(playerId):
+                print(str(i) + " " +str(playerId)+ " -> ")
+                print(game_state_res.msg[i])
+                # remove last outputed line
+                
+        self.object_handler.updateGameStateNpc(game_state_res.msg)
         
         self.weapon.update()
         pg.display.flip()
@@ -112,6 +118,7 @@ if __name__ == '__main__':
     spawn_location = connector.login()
     # global playerId 
     playerId= spawn_location[2]
+    print("spawn location: ",spawn_location)
     game = Game(connector,spawn_location[0],spawn_location[1])
     # game = Game(1,1)
 

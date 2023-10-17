@@ -41,41 +41,27 @@ class TCPServer:
         connector= MultiCliCon(client_socket,addr,i)
        
         while True:
-            # try:
-            # data = client_socket.recv(RECIEVE_BUFFER_SIZE)
-            # if not data:  # Checking if data is empty
-            #     print("Client disconnected")
-            #     client_socket.close()
-            #     return CLIENT_CLOSED
-            # decoded_data = data.decode("utf-8")
-            # if decoded_data == LOGIN_REQ:
-            #     response = f"1 2 {i}"
-            #     client_socket.send(response.encode("utf-8"))
-            #     continue
-            # jsondata=json.loads(decoded_data)
-            # self.game_state.players[i] = jsondata
-            # response = json.dumps(self.game_state.players)
-            # client_socket.send(response.encode("utf-8"))
 
-            recv =connector.recieve()
-            if recv.type == LOGIN_REQ:
-                connector.loginAccepted(self.map_obj)
-            elif recv.type == PLAYER_UPDATE:
-                self.game_state.players[i] = recv.msg
-                connector.playerUpdate(self.game_state)
+            try:
+                recv =connector.recieve()
+                if not recv:  # connection is closed by client
+                    print(f"Connection closed by {addr}")
+                    client_socket.close()
+                    del self.game_state.players[i]
+                    break
+                if recv.type == LOGIN_REQ:
+                    connector.loginAccepted(self.map_obj)
+                elif recv.type == PLAYER_UPDATE:
+                    self.game_state.players[i] = recv.msg
+                    connector.playerUpdate(self.game_state)
+            except Exception as e:
+                print(e)
+                client_socket.close()
+                del self.game_state.players[i]
+                break
 
 
 
-                # self.revMsg = pickle.loads(data)
-                
-                # if self.revMsg.type == LOGIN_REQ:
-                #     self.loginAccepted()
-                # elif self.revMsg.type == PLAYER_UPDATE:
-                #     self.playerUpdate()
-            # except EOFError:  # Catching the EOFError
-            #     print("Client disconnected unexpectedly")
-            #     client_socket.close()
-            #     return CLIENT_CLOSED
 
         
 
