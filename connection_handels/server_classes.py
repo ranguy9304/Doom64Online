@@ -85,74 +85,108 @@ class Game_State:
 		if 0 < player_dist < wall_dist or not wall_dist:
 		    return True
 		return False
-	def show(self,id):
-		for i, player in self.players.items():
-			if i != id:
-				print(f"Player {i}: {player}") 
+	def show(self,id =None):
+		if id:
+			for i, player in self.players.items():
+				if i != id:
+					print(f"Player {i}: {player}") 
+		else:
+			for i, player in self.players.items():
+				
+				print(f"Player {i}: {player}")
 		# for i in self.players:
 		# 	i.show()
+	def getJson(self):
+		return json.dumps(self.players)
 
 
 class MultiCliCon:
 	s=None
 	sendMsg=None
-	revMsg=None
+	recvMsg=None
 	addr=None
-	gameState=None
+	# gameState=None
 	playerId=None
-	def __init__(self,s,addr,gameState,i):
+	def __init__(self,s,addr,i):
 		self.s=s
 		self.addr=addr
-		self.gameState=gameState
+		# self.gameState=gameState
 		self.playerId=i
-	def recieveReq(self):
-		try:
-			data = self.s.recv(RECIEVE_BUFFER_SIZE)
-			if not data:  # Checking if data is empty
-				print("Client disconnected")
-				self.s.close()
-				return CLIENT_CLOSED
-			self.revMsg = pickle.loads(data)
-			print(self.revMsg.type)
-			if self.revMsg.type == LOGIN_REQ:
-				self.loginAccepted()
-			elif self.revMsg.type == PLAYER_UPDATE:
-				self.playerUpdate()
-		except EOFError:  # Catching the EOFError
-			print("Client disconnected unexpectedly")
-			self.s.close()
-			return CLIENT_CLOSED
-	def loginAccepted(self):
+	def recieve(self):
+		data = self.s.recv(RECIEVE_BUFFER_SIZE)
+		self.recvMsg = json.loads(data)
+		self.recvMsg=JsonPacket(self.recvMsg["type"],self.recvMsg["msg"])
+		return self.recvMsg
+	def loginAccepted(self,map_obj):
+		self.sendMsg=JsonPacket()
+		x_spawn=random.randrange(1,map_obj.rows-1,1)
+		y_spawn=random.randrange(1,map_obj.cols-1,1)
+		print(x_spawn,y_spawn)
+		res= LoginResMsg(x_spawn,y_spawn,self.playerId)
+		self.sendMsg=self.sendMsg.loginRes(res)
+		self.s.send(self.sendMsg.encode("utf-8"))
 
-		self.sendMsg=PacketClass(type=LOGIN_RES)
+		return
+	def playerUpdate(self,game_state):
+		self.sendMsg=JsonPacket()
+		self.sendMsg=self.sendMsg.gameStateUpdate(game_state)
+		self.s.send(self.sendMsg.encode("utf-8"))
 
-		x_spawn=random.randrange(1,self.gameState.map_obj.rows-1,1)
-		y_spawn=random.randrange(1,self.gameState.map_obj.cols-1,1)
+		return
+	# def recieveReq(self):
+	# 	try:
+	# 		data = self.s.recv(RECIEVE_BUFFER_SIZE)
+	# 		if not data:  # Checking if data is empty
+	# 			print("Client disconnected")
+	# 			self.s.close()
+	# 			return CLIENT_CLOSED
+	# 		self.revMsg = pickle.loads(data)
+			
+	# 		if self.revMsg.type == LOGIN_REQ:
+	# 			self.loginAccepted()
+	# 		elif self.revMsg.type == PLAYER_UPDATE:
+	# 			self.playerUpdate()
+	# 	except EOFError:  # Catching the EOFError
+	# 		print("Client disconnected unexpectedly")
+	# 		self.s.close()
+	# 		return CLIENT_CLOSED
+	# def loginAccepted(self):
 
-		self.sendMsg.msg = LoginRes(x_spawn,y_spawn,self.playerId)
+	# 	self.sendMsg=PacketClass(type=LOGIN_RES)
 
-		self.sendMsg = pickle.dumps(self.sendMsg)
+	# 	x_spawn=random.randrange(1,self.gameState[GAME_STATE_KEY].map_obj.rows-1,1)
+	# 	y_spawn=random.randrange(1,self.gameState[GAME_STATE_KEY].map_obj.cols-1,1)
+	# 	print(x_spawn,y_spawn)
+	# 	self.sendMsg.msg = LoginRes(x_spawn,y_spawn,self.playerId)
 
-		self.s.send(self.sendMsg)
+	# 	self.sendMsg = pickle.dumps(self.sendMsg)
 
-		print("SPAWN POINT SENT")
+	# 	self.s.send(self.sendMsg)
 
-		return 
-	def playerUpdate(self):
-		self.gameState.players[self.playerId].update(self.revMsg.msg.position,self.revMsg.msg.yaw,self.revMsg.msg.shoot)
-		# 	print("what " + decoded_data)
-		# 	player_data=json.loads(decoded_data)
-		# 	game_state.players[i].update(player_data["position"],player_data["yaw"],player_data["shoot"])
-		# 	if(game_state.players[i].shoot):
-		# 		print("player "+str(i)+" shot")
-				
-		# print(self.gameState.players[self.playerId])
-		###################################
-		self.sendMsg=PacketClass(type=GAME_STATE)
-		self.sendMsg.msg=self.gameState
-		self.gameState.show(self.playerId)
-		self.sendMsg = pickle.dumps(self.sendMsg)
-		self.s.send(self.sendMsg)
+	# 	print("SPAWN POINT SENT")
+
+	# 	return 
+	# def playerUpdate(self):
+	# 	if self.playerId not in self.gameState[GAME_STATE_KEY].players:
+	# 		print(f"Player {self.playerId} not yet added.")
+	# 		return
+
+	# 	self.gameState[GAME_STATE_KEY].players[self.playerId].update(self.revMsg.msg.position,self.revMsg.msg.yaw,self.revMsg.msg.shoot)
+	# 	# 	print("what " + decoded_data)
+	# 	# 	player_data=json.loads(decoded_data)
+	# 	# 	game_state.players[i].update(player_data["position"],player_data["yaw"],player_data["shoot"])
+	# 	# 	if(game_state.players[i].shoot):
+	# 	# 		print("player "+str(i)+" shot")
+	# 	print("################")
+	# 	self.gameState[GAME_STATE_KEY].show()
+	# 	print("################")
+	# 	# print(self.gameState[GAME_STATE_KEY].players[self.playerId])
+	# 	###################################
+	# 	self.sendMsg=PacketClass(type=GAME_STATE)
+	# 	self.sendMsg.msg=self.gameState[GAME_STATE_KEY]
+	# 	self.gameState[GAME_STATE_KEY].show(self.playerId)
+	# 	self.sendMsg = pickle.dumps(self.sendMsg)
+	# 	self.s.send(self.sendMsg)
 		# print("GAME STATE SENT")
 			# # msg='helo'
 

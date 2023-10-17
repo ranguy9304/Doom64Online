@@ -35,7 +35,7 @@ TEXTURE_SIZE = 256
 HALF_TEXTURE_SIZE = TEXTURE_SIZE // 2
 
 HOST = "127.0.0.1"
-PORT = 7000
+PORT = 7001
 
 LOGIN_REQ ="login req"
 PLAYER_UPDATE ="player update"
@@ -45,3 +45,5 @@ LOGIN_RES =  "login res"
 CLIENT_CLOSED = "client closed"
 
 RECIEVE_BUFFER_SIZE = 4096
+
+GAME_STATE_KEY ="game_state"

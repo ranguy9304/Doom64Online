@@ -63,24 +63,14 @@ class Game:
         self.player.update()
         self.raycasting.update()
         self.object_handler.update()
-        # print("1")
+ 
         global playerId
         obj=DataPlayer([self.player.map_pos],self.player.angle,self.player.shot)
-        # serGameState = self.connector.playerUpdate(obj)
-        # serGameState.show(playerId)
-        msg=obj.getJson()
-        # print("2 "+msg)
-        encoded_msg=bytes(msg, "utf-8")
-
-        self.connector.s.send(encoded_msg)
-        print("3")
-        data = self.connector.s.recv(4096)
-        decoded_data = data.decode("utf-8")
-        print("4 "+decoded_data)
         
-        # player_data=pickle.loads(data)
-        # player_data.show()
-        # a=SerPlayer()
+        game_state_res=self.connector.playerUpdate(obj)
+        print(game_state_res)
+
+        
         self.weapon.update()
         pg.display.flip()
         
@@ -114,20 +104,13 @@ class Game:
 
 if __name__ == '__main__':
 
-    connector = ClientCon()
+    connector = ClientJsonCon()
     print("---Connected to server---")
 
     # spawn_location = connector.login()
-    msg = "login"
-    encoded_msg=bytes(msg, "utf-8")
-
-    connector.s.send(encoded_msg)
-    data = connector.s.recv(4096)
-    decoded_data = data.decode("utf-8")
-    print("4 "+decoded_data)
-    data = decoded_data.split(" ")
-    spawn_location = [int(data[0]),int(data[1]),int(data[2])]
-    global playerId 
+    
+    spawn_location = connector.login()
+    # global playerId 
     playerId= spawn_location[2]
     game = Game(connector,spawn_location[0],spawn_location[1])
     # game = Game(1,1)
