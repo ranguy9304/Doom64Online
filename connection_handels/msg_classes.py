@@ -57,11 +57,14 @@ class DataPlayer:
 	position=[0,0]
 	yaw=0
 	shoot=False
-	health = 100
-	def __init__(self,position=[0,0],yaw=0,shoot=False):
+	health = None
+	shotWho=None
+	def __init__(self,position=[0,0],yaw=0,shoot=False,health=None,shotWho=None):
 		self.position=position
 		self.yaw=yaw
 		self.shoot=shoot
+		self.health=health
+		self.shotWho=shotWho
 	def update(self,position=[0,0],yaw=0,shoot=False):
 		self.position=position
 		self.yaw=yaw

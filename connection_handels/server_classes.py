@@ -107,6 +107,7 @@ class MultiCliCon:
 	addr=None
 	# gameState=None
 	playerId=None
+	restricted_area = {(i, j) for i in range(10) for j in range(10)}
 	def __init__(self,s,addr,i):
 		self.s=s
 		self.addr=addr
@@ -121,10 +122,13 @@ class MultiCliCon:
 		self.sendMsg=JsonPacket()
 		# x_spawn=random.randrange(1,map_obj.rows-1,1)
 		# y_spawn=random.randrange(1,map_obj.cols-1,1)
-		x_spawn=1
-		y_spawn=2
-		print(x_spawn,y_spawn)
-		res= LoginResMsg(x_spawn,y_spawn,self.playerId)
+		pos = x, y = random.randrange(map_obj.cols), random.randrange(map_obj.rows)
+		while (pos in map_obj.world_map) or (pos in self.restricted_area):
+			pos = x, y = random.randrange(map_obj.cols), random.randrange(map_obj.rows)
+		# x_spawn=1
+		# y_spawn=2
+		# print(x_spawn,y_spawn)
+		res= LoginResMsg(x,y,self.playerId)
 		self.sendMsg=self.sendMsg.loginRes(res)
 		self.s.send(self.sendMsg.encode("utf-8"))
 

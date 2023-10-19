@@ -35,6 +35,12 @@ class TCPServer:
             self.i+=1
             # conn =0
             
+    def check_bullet_collision(self, playerMsg, player):
+        x,y,yaw=playerMsg["position"][0][0],playerMsg["position"][0][1],playerMsg["yaw"]
+        # check which player are on the line x,y,yaw
+        
+
+
 
     def handle_client(self, client_socket, addr,i):
         print(f"Handling client {addr}")
@@ -52,10 +58,28 @@ class TCPServer:
                 if recv.type == LOGIN_REQ:
                     connector.loginAccepted(self.map_obj)
                 elif recv.type == PLAYER_UPDATE:
-                    self.game_state.players[i] = recv.msg
+                    if i in self.game_state.players:
+                        self.game_state.players[i]["position"] = recv.msg["position"]
+                        self.game_state.players[i]["yaw"] = recv.msg["yaw"]
+                        self.game_state.players[i]["shoot"] = recv.msg["shoot"]
+                        if int(recv.msg["health"]) == int(self.game_state.players[i]["health"])+1:
+                            self.game_state.players[i]["health"] = recv.msg["health"]
+                    else:
+                        self.game_state.players[i] = recv.msg
+
+                            
+                        # self.game_state.players[i] = recv.msg
+                    hurtPlayerId= recv.msg["shotWho"]
+                    if hurtPlayerId != None:
+                        print("SHOT "+str(hurtPlayerId))
+                        print("init health : "+str(self.game_state.players[int(hurtPlayerId)]["health"]))
+                        self.game_state.players[int(hurtPlayerId)]["health"]=int(self.game_state.players[int(hurtPlayerId)]["health"])-WEAPON_DAMAGE
+                        self.game_state.players[i]["shotWho"]=None
+                        print(self.game_state.players[int(hurtPlayerId)]["health"])
+                    # print(recv.msg)
                     connector.playerUpdate(self.game_state)
             except Exception as e:
-                print(e)
+                print("exception : "+str(e))
                 client_socket.close()
                 del self.game_state.players[i]
                 break

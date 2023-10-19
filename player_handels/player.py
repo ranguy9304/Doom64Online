@@ -2,7 +2,7 @@ from settings import *
 import pygame as pg
 import math
 import json
-
+from main_try import *
 class Player:
     def __init__(self, game,x,y):
         self.game = game
@@ -15,6 +15,7 @@ class Player:
         self.time_prev = pg.time.get_ticks()
         # diagonal movement correction
         self.diag_move_corr = 1 / math.sqrt(2)
+        self.shotWho = None
 
     def recover_health(self):
         if self.check_health_recovery_delay() and self.health < PLAYER_MAX_HEALTH:
@@ -31,18 +32,11 @@ class Player:
             self.game.object_renderer.game_over()
             pg.display.flip()
             pg.time.delay(1500)
-            msg="spawn init"
+            exit()
+            # init_new_game()
 
-            encoded_msg=bytes(msg, "utf-8")
-
-            self.game.s.send(encoded_msg)
-            data = self.game.s.recv(1024)
-            decoded_data = data.decode("utf-8")
-            spawn_location=json.loads(decoded_data)
-            self.game.new_game(spawn_location['x'],spawn_location['y'])
-
-    def get_damage(self, damage):
-        self.health -= damage
+    def get_damage(self):
+        # self.health -= damage
         self.game.object_renderer.player_damage()
         self.game.sound.player_pain.play()
         self.check_game_over()

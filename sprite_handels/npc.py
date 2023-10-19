@@ -1,9 +1,11 @@
 from sprite_handels.sprite_object import *
 from random import randint, random
 
+def distance(pos1, pos2):
+    return ((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)**0.5
 
 class NPC(AnimatedSprite):
-    def __init__(self, game, path='resources/sprites/npc/soldier/0.png', pos=(10.5, 5.5),
+    def __init__(self ,game, path='resources/sprites/npc/soldier/0.png', pos=(10.5, 5.5),
                  scale=0.6, shift=0.38, animation_time=180):
         super().__init__(game, path, pos, scale, shift, animation_time)
         self.attack_images = self.get_images(self.path + '/attack')
@@ -23,12 +25,21 @@ class NPC(AnimatedSprite):
         self.ray_cast_value = False
         self.frame_counter = 0
         self.player_search_trigger = False
+        self.yaw =None
+        
 
     def update(self):
         self.check_animation_time()
         self.get_sprite()
         self.run_logic()
         # self.draw_ray_cast()
+
+    def update(self,pos,yaw,health):
+        self.health=health
+        self.yaw=yaw
+        self.check_animation_time()
+        self.get_sprite()
+        self.run_logic(pos)
 
     def check_wall(self, x, y):
         return (x, y) not in self.game.map.world_map
@@ -49,6 +60,16 @@ class NPC(AnimatedSprite):
             dx = math.cos(angle) * self.speed
             dy = math.sin(angle) * self.speed
             self.check_wall_collision(dx, dy)
+    def movement(self,next_pos):
+        # next_pos = self.game.pathfinding.get_path(self.map_pos, self.game.player.map_pos)
+        next_x, next_y = next_pos
+
+        # pg.draw.rect(self.game.screen, 'blue', (100 * next_x, 100 * next_y, 100, 100))
+        if next_pos not in self.game.object_handler.npc_positions:
+            angle = math.atan2(next_y  - self.y, next_x  - self.x)
+            dx = math.cos(angle) * self.speed
+            dy = math.sin(angle) * self.speed
+            self.check_wall_collision(dx, dy)
 
     def attack(self):
         if self.animation_trigger:
@@ -62,6 +83,7 @@ class NPC(AnimatedSprite):
                 self.death_images.rotate(-1)
                 self.image = self.death_images[0]
                 self.frame_counter += 1
+        
 
     def animate_pain(self):
         self.animate(self.pain_images)
@@ -69,12 +91,15 @@ class NPC(AnimatedSprite):
             self.pain = False
 
     def check_hit_in_npc(self):
+        # print("check hit in npc "+ str(self.ray_cast_value and self.game.player.shot))
         if self.ray_cast_value and self.game.player.shot:
             if HALF_WIDTH - self.sprite_half_width < self.screen_x < HALF_WIDTH + self.sprite_half_width:
+                self.game.player.shotWho=self.npcId
+                print("hit "+str(self.npcId))
                 self.game.sound.npc_pain.play()
-                self.game.player.shot = False
+                # self.game.player.shot = False
                 self.pain = True
-                self.health -= self.game.weapon.damage
+                self.health -= WEAPON_DAMAGE
                 self.check_health()
 
     def check_health(self):
@@ -82,36 +107,46 @@ class NPC(AnimatedSprite):
             self.alive = False
             self.game.sound.npc_death.play()
 
-    def run_logic(self):
+    def run_logic(self,pos):
         if self.alive:
             self.ray_cast_value = self.ray_cast_player_npc()
             self.check_hit_in_npc()
-
+            # print((pos[0],pos[1]),self.pos)
+            # print("check point 1")
             if self.pain:
                 self.animate_pain()
 
-            elif self.ray_cast_value:
-                self.player_search_trigger = True
+            # elif self.ray_cast_value:
+            #     self.player_search_trigger = True
 
-                if self.dist < self.attack_dist:
-                    self.animate(self.attack_images)
-                    self.attack()
-                else:
-                    self.animate(self.walk_images)
-                    self.movement()
-
-            elif self.player_search_trigger:
+            #     if self.dist < self.attack_dist:
+            #         self.animate(self.attack_images)
+                    # self.attack()
+            #     else:
+            
+            elif distance((pos[0],pos[1]) , self.pos)>0.5:
                 self.animate(self.walk_images)
-                self.movement()
+                self.movement(pos)
+                # print("check point 2")
+            # else:
+            #     self.animate(self.idle_images)
+                # self.movement(pos)
 
-            else:
-                self.animate(self.idle_images)
+            # elif self.player_search_trigger:
+            #     self.animate(self.walk_images)
+            #     self.movement()
+
+            # else:
+            #     self.animate(self.idle_images)
         else:
             self.animate_death()
 
     @property
     def map_pos(self):
         return int(self.x), int(self.y)
+    @property
+    def pos(self):
+        return self.x, self.y
 
     def ray_cast_player_npc(self):
         if self.game.player.map_pos == self.map_pos:
@@ -182,12 +217,19 @@ class NPC(AnimatedSprite):
         if self.ray_cast_player_npc():
             pg.draw.line(self.game.screen, 'orange', (100 * self.game.player.x, 100 * self.game.player.y),
                          (100 * self.x, 100 * self.y), 2)
+    def kill(self):
+        self.health= 0
+        self.alive = False
+        self.game.sound.npc_death.play()
+        
 
 
 class SoldierNPC(NPC):
-    def __init__(self, game, path='resources/sprites/npc/soldier/0.png', pos=(10.5, 5.5),
+    def __init__(self,npcId, game, path='resources/sprites/npc/soldier/0.png', pos=(10.5, 5.5),
                  scale=0.6, shift=0.38, animation_time=180):
-        super().__init__(game, path, pos, scale, shift, animation_time)
+                
+        super().__init__(game,path, pos, scale, shift, animation_time)
+        self.npcId= npcId
 
 class CacoDemonNPC(NPC):
     def __init__(self, game, path='resources/sprites/npc/caco_demon/0.png', pos=(10.5, 6.5),

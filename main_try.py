@@ -65,16 +65,28 @@ class Game:
         self.object_handler.update()
  
         global playerId
-        obj=DataPlayer([self.player.map_pos],self.player.angle,self.player.shot)
-        
+        obj=DataPlayer([self.player.pos],self.player.angle,self.player.shot,self.player.health,self.player.shotWho)
+        # print("check point 3")
+        # print(obj)
         game_state_res=self.connector.playerUpdate(obj)
-        for i in game_state_res.msg:
-            # print(type(i))
-            if i != str(playerId):
-                print(str(i) + " " +str(playerId)+ " -> ")
-                print(game_state_res.msg[i])
+        # for i in game_state_res.msg:
+        #     # print(type(i))
+        #     if i != str(playerId):
+        #         print(str(i) + " " +str(playerId)+ " -> ")
+        #         print(game_state_res.msg[i])
                 # remove last outputed line
-                
+        print(int(game_state_res.msg[str(playerId)]["health"]),self.player.health)
+        if int(game_state_res.msg[str(playerId)]["health"])!=self.player.health:
+            print("got shot")
+            self.player.health=int(game_state_res.msg[str(playerId)]["health"])
+            self.player.get_damage()
+          
+        
+        currPlayerServerUpdate=game_state_res.msg[str(playerId)]
+        self.player.shotWho=currPlayerServerUpdate["shotWho"]
+        # print("shot : "+str(currPlayerServerUpdate["shotWho"]))
+        del game_state_res.msg[str(playerId)]
+
         self.object_handler.updateGameStateNpc(game_state_res.msg)
         
         self.weapon.update()
@@ -108,7 +120,24 @@ class Game:
             self.draw()
 
 
+def init_new_game():
+    connector = ClientJsonCon()
+    print("---Connected to server---")
+
+    # spawn_location = connector.login()
+    
+    spawn_location = connector.login()
+    global playerId 
+    playerId= spawn_location[2]
+    print("spawn location: ",spawn_location)
+    game = Game(connector,spawn_location[0],spawn_location[1])
+    # game = Game(1,1)
+
+    game.run()
+
+
 if __name__ == '__main__':
+    # init_new_game()
 
     connector = ClientJsonCon()
     print("---Connected to server---")

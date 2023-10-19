@@ -10,6 +10,7 @@ class SpriteObject:
         self.game = game
         self.player = game.player
         self.x, self.y = pos
+        print("path : "+path)
         self.image = pg.image.load(path).convert_alpha()
         self.IMAGE_WIDTH = self.image.get_width()
         self.IMAGE_HALF_WIDTH = self.image.get_width() // 2
@@ -20,6 +21,14 @@ class SpriteObject:
         self.SPRITE_HEIGHT_SHIFT = shift
 
     def get_sprite_projection(self):
+
+
+        # angle_diff = self.theta - yaw
+
+        # # Use the angle difference to determine the new orientation of the sprite
+        # rotated_image = pg.transform.rotate(self.image, math.degrees(angle_diff))
+
+
         proj = SCREEN_DIST / self.norm_dist * self.SPRITE_SCALE
         proj_width, proj_height = proj * self.IMAGE_RATIO, proj
 
