@@ -13,11 +13,12 @@ from render_handels.pathfinding import *
 # from server.server_classes import *
 from connection_handels.client_classes import *
 from connection_handels.msg_classes import *
+from login import *
 import socket
 import json
 import pickle
 
-# playerId=None
+playerId=None
 class Cli_updates:
     position=[1,0]
     yaw=0
@@ -63,24 +64,32 @@ class Game:
         self.player.update()
         self.raycasting.update()
         self.object_handler.update()
-        # print("1")
+ 
         global playerId
-        obj=DataPlayer([self.player.map_pos],self.player.angle,self.player.shot)
-        # serGameState = self.connector.playerUpdate(obj)
-        # serGameState.show(playerId)
-        msg=obj.getJson()
-        # print("2 "+msg)
-        encoded_msg=bytes(msg, "utf-8")
-
-        self.connector.s.send(encoded_msg)
-        print("3")
-        data = self.connector.s.recv(4096)
-        decoded_data = data.decode("utf-8")
-        print("4 "+decoded_data)
+        obj=DataPlayer([self.player.pos],self.player.angle,self.player.shot,self.player.health,self.player.shotWho)
+        # print("check point 3")
+        # print(obj)
+        game_state_res=self.connector.playerUpdate(obj)
+        # for i in game_state_res.msg:
+        #     # print(type(i))
+        #     if i != str(playerId):
+        #         print(str(i) + " " +str(playerId)+ " -> ")
+        #         print(game_state_res.msg[i])
+                # remove last outputed line
+        # print(int(game_state_res.msg[str(playerId)]["health"]),self.player.health)
+        if int(game_state_res.msg[str(playerId)]["health"])!=self.player.health:
+            print("got shot")
+            self.player.health=int(game_state_res.msg[str(playerId)]["health"])
+            self.player.get_damage()
+          
         
-        # player_data=pickle.loads(data)
-        # player_data.show()
-        # a=SerPlayer()
+        currPlayerServerUpdate=game_state_res.msg[str(playerId)]
+        self.player.shotWho=currPlayerServerUpdate["shotWho"]
+        # print("shot : "+str(currPlayerServerUpdate["shotWho"]))
+        del game_state_res.msg[str(playerId)]
+
+        self.object_handler.updateGameStateNpc(game_state_res.msg)
+        
         self.weapon.update()
         pg.display.flip()
         
@@ -112,24 +121,51 @@ class Game:
             self.draw()
 
 
-if __name__ == '__main__':
-
-    connector = ClientCon()
+def init_new_game():
+    connector = ClientJsonCon()
     print("---Connected to server---")
 
     # spawn_location = connector.login()
-    msg = "login"
-    encoded_msg=bytes(msg, "utf-8")
-
-    connector.s.send(encoded_msg)
-    data = connector.s.recv(4096)
-    decoded_data = data.decode("utf-8")
-    print("4 "+decoded_data)
-    data = decoded_data.split(" ")
-    spawn_location = [int(data[0]),int(data[1]),int(data[2])]
+    
+    spawn_location = connector.login()
     global playerId 
     playerId= spawn_location[2]
+    print("spawn location: ",spawn_location)
     game = Game(connector,spawn_location[0],spawn_location[1])
     # game = Game(1,1)
 
     game.run()
+
+
+if __name__ == '__main__':
+    # init_new_game()
+    LoginState().run()
+    connector = ClientJsonCon()
+    print("---Connected to server---")
+
+    # spawn_location = connector.login()
+    
+    spawn_location = connector.login()
+    # global playerId 
+    playerId= spawn_location[2]
+    print("spawn location: ",spawn_location)
+    game = Game(connector,spawn_location[0],spawn_location[1])
+    # game = Game(1,1)
+
+    game.run()
+
+
+# def startGame():
+#     connector = ClientJsonCon()
+#     print("---Connected to server---")
+
+#     # spawn_location = connector.login()
+    
+#     spawn_location = connector.login()
+#     # global playerId 
+#     playerId= spawn_location[2]
+#     print("spawn location: ",spawn_location)
+#     game = Game(connector,spawn_location[0],spawn_location[1])
+#     # game = Game(1,1)
+
+#     game.run()

@@ -2,7 +2,7 @@ from settings import *
 import pygame as pg
 import math
 import json
-from main_try import *
+from main import *
 class Player:
     def __init__(self, game,x,y):
         self.game = game

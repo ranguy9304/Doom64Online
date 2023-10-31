@@ -13,6 +13,7 @@ class NPC(AnimatedSprite):
         self.idle_images = self.get_images(self.path + '/idle')
         self.pain_images = self.get_images(self.path + '/pain')
         self.walk_images = self.get_images(self.path + '/walk')
+        self.standard_image = path
 
         self.attack_dist = randint(3, 6)
         self.speed = 0.03
@@ -124,9 +125,11 @@ class NPC(AnimatedSprite):
                     # self.attack()
             #     else:
             
-            elif distance((pos[0],pos[1]) , self.pos)>0.5:
+            elif distance((pos[0],pos[1]) , self.pos)>0.1:
                 self.animate(self.walk_images)
                 self.movement(pos)
+            else:
+                self.image = pg.image.load(self.standard_image).convert_alpha()
                 # print("check point 2")
             # else:
             #     self.animate(self.idle_images)

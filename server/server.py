@@ -3,94 +3,90 @@ import sys
 sys.path.insert(0, '/home/ranguy/main/projects/Doom64Online/')
 import socket
 import json
-
 from render_handels.map import *
+from multiprocessing import Process, Manager, Lock
+from multiprocessing.managers import BaseManager
 from connection_handels.server_classes import *
 import random
 import pickle
 from settings import * 
 
-# s = socket.socket()
-# s.bind((HOST, PORT))
-# s.listen(10)
+import socket
+import threading
 
+class TCPServer:
+    Baseconnector = ServerCon()
+    map_obj=Map(None)
+    map_obj.get_map()
+    game_state=Game_State(map_obj=map_obj)
+    i=0
+    def __init__(self):
+     
+        self.clients = {}
 
-map_obj=Map(None)
-map_obj.get_map()
-game_state=Game_State(map_obj=map_obj)
-
-	
-
-
-def handle_client(connector, i):
-	while True:
-		if connector.recieveReq() == CLIENT_CLOSED:
-			return
-		# game_state.show()
-		# data = s.recv(1024)
-		# # decoded_data = data.decode("utf-8")
-		# revMsg=pickle.loads(data)
-		# print(revMsg.type)
-
-
-
-
-		# data = s.recv(1024)
-		# decoded_data = data.decode("utf-8")
-		# if not decoded_data:
-		# 	print("\nconnection with client " + str(i) + " broken\n")
-		# 	break
-		# if decoded_data=="spawn init":
-		# 	x_spawn=random.randrange(1,game_state.map_obj.rows-1,1)
-		# 	y_spawn=random.randrange(1,game_state.map_obj.cols-1,1)
-		# 	msg='{ "x" : '+str(x_spawn)+' ,"y": '+str(y_spawn)+' }'
-
-		# 	encoded_msg=bytes(msg, "utf-8")
-
-		# 	s.send(encoded_msg)		
-		# else:
-		# 	print("what " + decoded_data)
-		# 	player_data=json.loads(decoded_data)
-		# 	game_state.players[i].update(player_data["position"],player_data["yaw"],player_data["shoot"])
-		# 	if(game_state.players[i].shoot):
-		# 		print("player "+str(i)+" shot")
-				
-		# 	print(game_state.players[i])
-		###################################
-			# msg=pickle.dumps(game_state)
-			# # msg='helo'
-
-			# # encoded_msg=bytes(msg, "utf-8")
-
-			# s.send(msg)		
-			# print(msg)
-			# encoded_msg=bytes(msg, "utf-8")
-			# self.s.send(encoded_msg)
-			
-			
+    def start(self):
+    
+        while True:
+            conn, addr = self.Baseconnector.acceptCon()  # accept a client connection
+            print(f"Connection from {addr}")
+            # if addr not in self.clients:
+            client_thread = threading.Thread(target=self.handle_client, args=(conn, addr,self.i))
+            client_thread.start()
+            self.i+=1
+            # conn =0
+            
+        
 
 
 
-def server():
-	i = 1
-	lim=10
-	Baseconnector = ServerCon()
-	global game_state
-	while i <= lim:
-		c, addr = Baseconnector.acceptCon()
-		# c, addr = s.accept()
+    def handle_client(self, client_socket, addr,i):
+        print(f"Handling client {addr}")
+        connector= MultiCliCon(client_socket,addr,i)
+       
+        while True:
 
-		child_pid = os.fork()
+            try:
+                recv =connector.recieve()
+                if not recv:  # connection is closed by client
+                    print(f"Connection closed by {addr}")
+                    client_socket.close()
+                    del self.game_state.players[i]
+                    break
+                if recv.type == LOGIN_REQ:
+                    connector.loginAccepted(self.map_obj)
+                elif recv.type == PLAYER_UPDATE:
+                    if i in self.game_state.players:
+                        self.game_state.players[i]["position"] = recv.msg["position"]
+                        self.game_state.players[i]["yaw"] = recv.msg["yaw"]
+                        self.game_state.players[i]["shoot"] = recv.msg["shoot"]
+                        if int(recv.msg["health"]) == int(self.game_state.players[i]["health"])+1:
+                            self.game_state.players[i]["health"] = recv.msg["health"]
+                    else:
+                        self.game_state.players[i] = recv.msg
 
-		if child_pid == 0:
-			cliConnector = MultiCliCon(c,addr,game_state,i)
-			p0=DataPlayer()
-			game_state.players[i]=p0
-			print("\nconnection successful with client " + str(i) + str(addr) + "\n")
-			handle_client(cliConnector, i)
-			lim+=1
-			break
-		else:
-			i+=1
+                            
+                        # self.game_state.players[i] = recv.msg
+                    hurtPlayerId= recv.msg["shotWho"]
+                    if hurtPlayerId != None:
+                        print("SHOT "+str(hurtPlayerId))
+                        print("init health : "+str(self.game_state.players[int(hurtPlayerId)]["health"]))
+                        self.game_state.players[int(hurtPlayerId)]["health"]=int(self.game_state.players[int(hurtPlayerId)]["health"])-WEAPON_DAMAGE
+                        self.game_state.players[i]["shotWho"]=None
+                        print(self.game_state.players[int(hurtPlayerId)]["health"])
+                    # print(recv.msg)
+                    connector.playerUpdate(self.game_state)
+            except Exception as e:
+                print("exception : "+str(e))
+                client_socket.close()
+                del self.game_state.players[i]
+                break
 
-server()
+
+
+
+        
+
+
+server = TCPServer()
+server.start()
+
