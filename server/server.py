@@ -54,6 +54,7 @@ class TCPServer:
                     break
                 if recv.type == LOGIN_REQ:
                     connector.loginAccepted(self.map_obj)
+                    print(recv.msg + " has joined the game")
                 elif recv.type == PLAYER_UPDATE:
                     if i in self.game_state.players:
                         self.game_state.players[i]["position"] = recv.msg["position"]
@@ -84,7 +85,7 @@ class TCPServer:
 
 
 
-        
+
 
 
 server = TCPServer()

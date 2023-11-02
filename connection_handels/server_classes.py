@@ -116,6 +116,7 @@ class MultiCliCon:
 	def recieve(self):
 		data = self.s.recv(RECIEVE_BUFFER_SIZE)
 		self.recvMsg = json.loads(data)
+		# print("DATA REC "+self.recvMsg["type"],self.recvMsg["msg"])
 		self.recvMsg=JsonPacket(self.recvMsg["type"],self.recvMsg["msg"])
 		return self.recvMsg
 	def loginAccepted(self,map_obj):

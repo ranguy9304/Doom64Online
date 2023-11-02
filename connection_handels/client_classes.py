@@ -35,9 +35,9 @@ class ClientJsonCon:
     def __init__(self):
         self.s = socket.socket()
         self.s.connect((HOST, PORT))
-    def login(self):
+    def login(self,username):
         self.sendMsg=JsonPacket()
-        self.sendMsg=self.sendMsg.loginReq()
+        self.sendMsg=self.sendMsg.loginReq(username)
         self.s.send(self.sendMsg.encode("utf-8"))
 
         self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)

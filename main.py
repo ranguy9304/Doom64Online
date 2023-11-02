@@ -114,6 +114,7 @@ class Game:
             self.player.single_fire_event(event)
 
     def run(self):
+        # self.object_handler.spawn_npc()
         
         while True:
             self.check_events()
@@ -139,13 +140,14 @@ def init_new_game():
 
 if __name__ == '__main__':
     # init_new_game()
-    LoginState().run()
+    username=(LoginState().run())
+    print(username)
     connector = ClientJsonCon()
     print("---Connected to server---")
 
     # spawn_location = connector.login()
     
-    spawn_location = connector.login()
+    spawn_location = connector.login(username)
     # global playerId 
     playerId= spawn_location[2]
     print("spawn location: ",spawn_location)

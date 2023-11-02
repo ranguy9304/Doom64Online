@@ -30,9 +30,12 @@ class JsonPacket:
 		# if msg:
 			if self.type!=LOGIN_REQ:
 				self.msg=json.loads(msg)
-	def loginReq(self):
+				# print(self.msg)
+			else:
+				self.msg = msg
+	def loginReq(self,username):
 		self.type=LOGIN_REQ
-		self.msg="login"
+		self.msg=username
 		return self.getJson()
 	def loginRes(self,spawn):
 		self.type=LOGIN_RES

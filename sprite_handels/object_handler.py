@@ -17,7 +17,7 @@ class ObjectHandler:
         self.npc_record={}
 
         # spawn npc
-        self.enemies = 1# npc count
+        self.enemies = 10# npc count
         self.npc_types = [SoldierNPC, CacoDemonNPC, CyberDemonNPC]
         self.weights = [100, 0, 0]
         self.restricted_area = {(i, j) for i in range(10) for j in range(10)}
@@ -63,8 +63,9 @@ class ObjectHandler:
     #             pos = x, y = randrange(self.game.map.cols), randrange(self.game.map.rows)
     #             while (pos in self.game.map.world_map) or (pos in self.restricted_area):
     #                 pos = x, y = randrange(self.game.map.cols), randrange(self.game.map.rows)
-    #             self.add_npc(npc(self.game, pos=(x + 0.5, y + 0.5)))
+    #             self.add_npc(npc(999,self.game, pos=(x + 0.5, y + 0.5)))
     def updateGameStateNpc(self,playerDict):
+        
         for i in self.npc_record:
             if i not in playerDict:
                 self.npc_record[i].kill()
