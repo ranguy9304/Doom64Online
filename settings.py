@@ -1,8 +1,8 @@
 import math
 
 # game settings
-# RES = WIDTH, HEIGHT = 860, 540
-RES = WIDTH, HEIGHT = 1920, 1080
+RES = WIDTH, HEIGHT = 860, 540
+# RES = WIDTH, HEIGHT = 1920, 1080
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
 FPS = 0
@@ -47,5 +47,7 @@ CLIENT_CLOSED = "client closed"
 RECIEVE_BUFFER_SIZE = 4096
 
 GAME_STATE_KEY ="game_state"
+UDP_CON_REQ ="udp connection request"
+UDP_CON_RES ="udp connection request"
 
 WEAPON_DAMAGE = 50

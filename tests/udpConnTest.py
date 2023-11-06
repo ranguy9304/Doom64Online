@@ -1,10 +1,14 @@
+import sys
+sys.path.insert(0, '/home/ranguy/main/projects/Doom64Online/')
 
-
-import socket
-from settings import *
+from connection_handels.client_classes import *
 from connection_handels.msg_classes import *
+from login import *
+import socket
+import json
 import pickle
 
+from time import sleep
 
 class UDPCon:
     s=None
@@ -57,55 +61,25 @@ class UDPCon:
         return self.revMsg
 
 
-class ClientCon:
-    s=None
-    sendMsg = None
-    revMsg = None
-    def __init__(self):
-        self.s = socket.socket()
-        self.s.connect((HOST, PORT))
-    def login(self):
-        self.sendMsg=PacketClass(type=LOGIN_REQ)
-        self.sendMsg = pickle.dumps(self.sendMsg)
-        self.s.send(self.sendMsg)
-        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
-        self.revMsg = pickle.loads(self.revMsg)
-        return [self.revMsg.msg.x,self.revMsg.msg.y,self.revMsg.msg.id]
-    def playerUpdate(self,obj):
-        self.sendMsg=PacketClass(type=PLAYER_UPDATE)
-        self.sendMsg.msg = obj
-        self.sendMsg = pickle.dumps(self.sendMsg)
-        self.s.send(self.sendMsg)
-        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
-        self.revMsg = pickle.loads(self.revMsg)
-        return self.revMsg.msg
 
-class ClientJsonCon:
-    s=None
-    sendMsg = None
-    revMsg = None
-    def __init__(self):
-        self.s = socket.socket()
-        self.s.connect((HOST, PORT))
-    def login(self,username):
-        self.sendMsg=JsonPacket()
-        self.sendMsg=self.sendMsg.loginReq(username)
-        self.s.send(self.sendMsg.encode("utf-8"))
-
-        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
-        self.revMsg = json.loads(self.revMsg)
-        self.revMsg=JsonPacket(self.revMsg["type"],self.revMsg["msg"])
-        # print([int(self.revMsg.msg['x']),int(self.revMsg.msg['y']),int(self.revMsg.msg['id'])])
-        return [int(self.revMsg.msg["x"]),int(self.revMsg.msg["y"]),int(self.revMsg.msg["id"])]
-    def playerUpdate(self,player):
-        self.sendMsg=JsonPacket()
-        self.sendMsg=self.sendMsg.playerUpdate(player)
-        self.s.send(self.sendMsg.encode("utf-8"))
-
-        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
-        # print(self.revMsg)
-        self.revMsg = json.loads(self.revMsg)
-        self.revMsg = JsonPacket(self.revMsg["type"], self.revMsg["msg"])
-        return self.revMsg
-
-        
+playerId=0
+connector = UDPCon()
+print("---Connected to server---")
+socketnew=connector.sendConnMsg()
+connector.port= socketnew
+spawn_location= connector.login("rudra")
+print(spawn_location)
+fileObj = open('data.obj', 'rb')
+obj = pickle.load(fileObj)
+fileObj.close()
+print(obj)
+while(1):
+    game_state_res=connector.playerUpdate(obj)
+    for i in game_state_res.msg:
+                # print(type(i))
+        if i != str(playerId):
+            print(str(i) + " " +str(playerId)+ " -> ")
+            print(game_state_res.msg[i])
+            # remove last outputed line
+        # print(int(game_state_res.msg[str(playerId)]["health"]))
+    sleep(0.5)

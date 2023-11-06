@@ -1,6 +1,9 @@
 from settings import *
 import json
 
+
+
+
 class PacketClass:
     type = None
     msg = None
@@ -28,11 +31,19 @@ class JsonPacket:
 			# self.msg=msg
 			self.type=type
 		# if msg:
-			if self.type!=LOGIN_REQ:
+			if self.type!=LOGIN_REQ and self.type != UDP_CON_REQ:
 				self.msg=json.loads(msg)
 				# print(self.msg)
 			else:
 				self.msg = msg
+	def udpConnReq(self):
+		self.type = UDP_CON_REQ
+		self.msg = None
+		return self.getJson()
+	def udpConnRes(self,socket):
+		self.type = UDP_CON_RES
+		self.msg = str(socket)
+		return self.getJson()
 	def loginReq(self,username):
 		self.type=LOGIN_REQ
 		self.msg=username

@@ -86,6 +86,7 @@ class Game_State:
 		    return True
 		return False
 	def show(self,id =None):
+		print("Game State: ###########\n")
 		if id:
 			for i, player in self.players.items():
 				if i != id:
@@ -94,6 +95,7 @@ class Game_State:
 			for i, player in self.players.items():
 				
 				print(f"Player {i}: {player}")
+		print("############\n\n")
 		# for i in self.players:
 		# 	i.show()
 	def getJson(self):

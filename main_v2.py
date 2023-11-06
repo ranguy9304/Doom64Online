@@ -147,12 +147,14 @@ if __name__ == '__main__':
     # init_new_game()
     username=(LoginState().run())
     print(username)
-    connector = ClientJsonCon()
+    connector = UDPCon()
+    connector.port=connector.sendConnMsg()
+    spawn_location= connector.login(username)
     print("---Connected to server---")
 
     # spawn_location = connector.login()
     
-    spawn_location = connector.login(username)
+    # spawn_location = connector.login(username)
     # global playerId 
     playerId= spawn_location[2]
     print("spawn location: ",spawn_location)
