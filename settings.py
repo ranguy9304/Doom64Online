@@ -1,8 +1,16 @@
 import math
-
+import subprocess
 # game settings
-RES = WIDTH, HEIGHT = 860, 540
+# RES = WIDTH, HEIGHT = 860, 540
 # RES = WIDTH, HEIGHT = 1920, 1080
+
+out= subprocess.Popen('xrandr | grep "\*" | cut -d" " -f4',shell=True, stdout=subprocess.PIPE).communicate()[0]
+out=out.decode("utf-8")
+out=out.split("x")
+WIDTH=int(out[0])
+HEIGHT=int(out[1])
+RES = WIDTH, HEIGHT
+
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
 FPS = 0
