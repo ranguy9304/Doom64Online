@@ -3,6 +3,11 @@ from settings import *
 import socket
 # Using readlines()
 
+def my_ip():
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    print(IPAddr)
+    return IPAddr
 
 def find_all_ips():
     hostname = socket.gethostname()
