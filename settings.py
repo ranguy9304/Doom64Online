@@ -36,7 +36,7 @@ HALF_TEXTURE_SIZE = TEXTURE_SIZE // 2
 
 HOST = "127.0.0.1"
 PORT = 7000
-
+SERVER_FINDER_PORT = 6999
 LOGIN_REQ ="login req"
 PLAYER_UPDATE ="player update"
 GAME_STATE ="game state"
@@ -51,3 +51,5 @@ UDP_CON_REQ ="udp connection request"
 UDP_CON_RES ="udp connection request"
 
 WEAPON_DAMAGE = 50
+
+FINDER_TIMEOUT=0.1
