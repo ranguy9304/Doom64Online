@@ -1,12 +1,14 @@
 import os
 import sys
-sys.path.insert(0, '/home/ranguy/main/projects/Doom64Online/')
+print(os.getcwd())
+sys.path.insert(0, os.getcwd())
 import socket
 import json
 from render_handels.map import *
 from multiprocessing import Process, Manager, Lock
 from multiprocessing.managers import BaseManager
 from connection_handels.server_classes import *
+from server_finder import *
 import random
 import pickle
 from settings import * 
@@ -22,23 +24,29 @@ class UDPMultiCliCon:
     cliAddr=None
     # gameState=None
     playerId=None
+    host=HOST
     restricted_area = {(i, j) for i in range(10) for j in range(10)}
-    def __init__(self,port=None,i=None,addr = None):
+    def __init__(self,port=None,host=None,i=None,addr = None):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s.settimeout(5.0)
         self.cliAddr = addr
+        if host:
+            self.host = host
         if port:
-            self.s.bind((HOST,port))
+            self.s.bind((self.host,port))
         else:
-            self.s.bind((HOST, PORT))
+            self.s.bind((self.host, PORT))
         self.playerId=i
     def recieve(self):
+        print("data trying")
         data = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+        print("data recieved ")
         self.recvMsg = json.loads(data)
         # print("DATA REC "+self.recvMsg["type"],self.recvMsg["msg"])
         self.recvMsg=JsonPacket(self.recvMsg["type"],self.recvMsg["msg"])
         return self.recvMsg
     def loginAccepted(self,map_obj):
+        print("login acc in")
         self.sendMsg=JsonPacket()
         # x_spawn=random.randrange(1,map_obj.rows-1,1)
         # y_spawn=random.randrange(1,map_obj.cols-1,1)
@@ -50,6 +58,7 @@ class UDPMultiCliCon:
         # print(x_spawn,y_spawn)
         res= LoginResMsg(x,y,self.playerId)
         self.sendMsg=self.sendMsg.loginRes(res)
+        print("login in sending "+self.sendMsg)
         self.s.sendto(self.sendMsg.encode("utf-8"),self.cliAddr)
 
         return
@@ -66,12 +75,15 @@ class UDPServerCon:
     sendMsg=None
     recvMsg=None
     cliAddr = None
-    def __init__(self,port=None):
+    host = None
+    def __init__(self,port=None,host=None):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        if host:
+            self.host = host
         if port:
-            self.s.bind((HOST,port))
+            self.s.bind((self.host,port))
         else:
-            self.s.bind((HOST, PORT))
+            self.s.bind((self.host, PORT))
     def accMsg(self):
         self.recvMsg , self.cliAddr = self.s.recvfrom(RECIEVE_BUFFER_SIZE)
         self.recvMsg = json.loads(self.recvMsg)
@@ -96,7 +108,7 @@ class UDPServer:
     i=0
     def __init__(self):
         self.client_handlers = {}
-        self.main_connector = UDPServerCon()
+        self.main_connector = UDPServerCon(host=my_ip())
         self.next_available_port = PORT + 1
     def assignPort(self):
         client_port = self.next_available_port
@@ -124,7 +136,7 @@ class UDPServer:
     def handle_client(self, client_addr, com_port,i):
         # Create a new socket for this client
         print(f"Handling client {client_addr}")
-        connector = UDPMultiCliCon(com_port,i,client_addr)
+        connector = UDPMultiCliCon(com_port,my_ip(),i,client_addr)
         
 
         while True:
