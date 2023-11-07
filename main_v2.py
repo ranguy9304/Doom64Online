@@ -13,6 +13,7 @@ from render_handels.pathfinding import *
 # from server.server_classes import *
 from connection_handels.client_classes import *
 from connection_handels.msg_classes import *
+from server_finder import *
 from login import *
 import socket
 import json
@@ -146,8 +147,10 @@ def init_new_game():
 if __name__ == '__main__':
     # init_new_game()
     username=(LoginState().run())
-    print(username)
-    connector = UDPCon()
+    find_all_ips()
+    host = find_server()
+    print(username,host)
+    connector = UDPCon(host=host)
     connector.port=connector.sendConnMsg()
     spawn_location= connector.login(username)
     print("---Connected to server---")
