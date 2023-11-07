@@ -22,8 +22,9 @@ def find_all_ips():
         netId+= secs[i]+"."
     netId+="0"
     print(netId)
-
-    os.system("nmap -n -sn 172.16.59.0/24 -oG - | awk '/Up$/{print $2}' > ips.txt")
+    
+    os.system("nmap -n -sn "+netId+"/24 -oG - | awk '/Up$/{print $2}' > ips.txt")
+    # os.system("nmap -n -sn 172.16.59.0/24 -oG - | awk '/Up$/{print $2}' ")
 
 
 def find_server():
@@ -34,6 +35,7 @@ def find_server():
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(FINDER_TIMEOUT)
+    line =None
     # Strips the newline character
     for line in Lines:
         try:
@@ -48,4 +50,7 @@ def find_server():
         except Exception as e:
             print(e)
             continue
-    return line[:-1]
+    if line:
+        return line[:-1]
+    else:
+        return HOST

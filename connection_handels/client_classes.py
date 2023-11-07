@@ -12,9 +12,12 @@ class UDPCon:
     revMsg=None
     cliAddr = None
     port = None
-    def __init__(self,port=None):
+    host=HOST
+    def __init__(self,host=None,port=None):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        
+        self.s.settimeout(0.5)
+        if host:
+            self.host=host
     def accMsg(self):
         self.revMsg , self.cliAddr = self.s.recvfrom(RECIEVE_BUFFER_SIZE)
         self.revMsg = json.loads(self.revMsg)
@@ -27,19 +30,42 @@ class UDPCon:
     def sendConnMsg(self):
         self.sendMsg=JsonPacket()
         self.sendMsg=self.sendMsg.udpConnReq()
-        self.s.sendto(self.sendMsg.encode("utf-8"), (HOST,PORT))
+        sent =False
+        while not sent:
+            try:
+                self.s.sendto(self.sendMsg.encode("utf-8"), (self.host,PORT))
+                self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+                sent = True
+            except Exception as e:
 
-        self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+                print(e)
+                sent = False
+                continue
         self.revMsg = json.loads(self.revMsg)
         print("DATA REC "+self.revMsg["type"],self.revMsg["msg"])
         return int(self.revMsg["msg"])
         # return 7001
     def login(self,username):
+        
+        print(self.host,self.port)
+
         self.sendMsg=JsonPacket()
         self.sendMsg=self.sendMsg.loginReq(username)
-        self.s.sendto(self.sendMsg.encode("utf-8"), (HOST,self.port))
+        sent = False
+        while not sent:
+            try:
+        # sleep(0.5)
+                self.s.sendto(self.sendMsg.encode("utf-8"), (self.host,self.port))
+            # except timeout of socket
+                
+        
+                self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+                sent = True
+            except Exception as e:
+                print(e)
+                sent = False
 
-        self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+
         print(self.revMsg)
         self.revMsg = json.loads(self.revMsg)
         self.revMsg=JsonPacket(self.revMsg["type"],self.revMsg["msg"])
@@ -48,10 +74,22 @@ class UDPCon:
     def playerUpdate(self,player):
         self.sendMsg=JsonPacket()
         self.sendMsg=self.sendMsg.playerUpdate(player)
-        self.s.sendto(self.sendMsg.encode("utf-8"),(HOST,self.port))
 
-        self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
-        # print(self.revMsg)
+        sent = False
+        while not sent:
+            try:
+
+                self.s.sendto(self.sendMsg.encode("utf-8"),(self.host,self.port))
+                self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+                sent = True
+            except Exception as e:
+                print(e)
+                sent = False
+                continue
+        
+
+
+        print(self.revMsg)
         self.revMsg = json.loads(self.revMsg)
         self.revMsg = JsonPacket(self.revMsg["type"], self.revMsg["msg"])
         return self.revMsg

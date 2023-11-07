@@ -33,6 +33,7 @@ class UDPMultiCliCon:
         if host:
             self.host = host
         if port:
+            print("present",(self.host,port))
             self.s.bind((self.host,port))
         else:
             self.s.bind((self.host, PORT))
@@ -135,7 +136,8 @@ class UDPServer:
 
     def handle_client(self, client_addr, com_port,i):
         # Create a new socket for this client
-        print(f"Handling client {client_addr}")
+        print(f"Handling client {client_addr} {com_port}")
+        print(my_ip())
         connector = UDPMultiCliCon(com_port,my_ip(),i,client_addr)
         
 

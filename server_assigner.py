@@ -14,6 +14,6 @@ while(True):
     recvMsg , cliAddr = s.recvfrom(RECIEVE_BUFFER_SIZE)
 
     if recvMsg.decode() == "server?":
-
+        print("req")
 
         s.sendto("yes".encode("utf-8"), cliAddr)
