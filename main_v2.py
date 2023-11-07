@@ -151,8 +151,12 @@ if __name__ == '__main__':
     host = find_server()
     print(username,host)
     connector = UDPCon(host=host)
-    connector.port=connector.sendConnMsg()
+    porttemp = connector.sendConnMsg()
+    print(porttemp)
+    connector.port= porttemp
     spawn_location= connector.login(username)
+    # spawn_location= connector.login(username)
+
     print("---Connected to server---")
 
     # spawn_location = connector.login()
