@@ -1,0 +1,31 @@
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Features of Doom64 Online}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Reason for Selection}{1}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Analysis Focus and Hypotheses}{2}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Research questions/hypotheses}{2}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Background}{3}{section.2}%
+\contentsline {section}{\numberline {3}Data}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Data Preparation}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Significance of Data Preparation}{5}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Approach}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}L0: Design}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}L1: Detailed Overview}{6}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Server}{6}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Client}{6}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}Communication Flow}{7}{subsubsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.3}TCP Server Implementation}{8}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}TCP Fallbacks and Challenges}{8}{subsubsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.4}UDP Implementation}{8}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}UDPServer Class}{8}{subsubsection.4.4.1}%
+\contentsline {paragraph}{UDP Server Functionality}{9}{paragraph*.1}%
+\contentsline {paragraph}{Client-Server Communication}{9}{paragraph*.2}%
+\contentsline {subsection}{\numberline {4.5}Game State Management}{11}{subsection.4.5}%
+\contentsline {subsubsection}{\numberline {4.5.1}Game State Class Functions}{11}{subsubsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.6}Pseudocode for Server Flow}{12}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Client-Side Implementation}{13}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}Server Finder}{16}{subsection.4.8}%
+\contentsline {section}{\numberline {5}Results}{18}{section.5}%
+\contentsline {section}{\numberline {6}Discussion}{18}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Limitations and Challenges}{18}{subsection.6.1}%
+\contentsline {section}{\numberline {7}Conclusion}{18}{section.7}%
+\contentsline {section}{\numberline {8}Reflections on own work}{19}{section.8}%

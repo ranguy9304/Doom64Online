@@ -1,0 +1,13 @@
+# Fdb version 4
+["pdflatex"] 1698898467 "00_front_page.tex" "00_front_page.pdf" "00_front_page" 1698898467 2
+  "/etc/texmf/web2c/texmf.cnf" 1695021031 475 c0e671620eb5563b2130f56340a5fde8 ""
+  "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1681034085 39561 34c98e380bf7c7201ee6a7909aff625a ""
+  "/usr/share/texmf/web2c/texmf.cnf" 1681034085 39561 34c98e380bf7c7201ee6a7909aff625a ""
+  "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1697094650 7881614 406d818ff302fd162604bfca3b0a4ae7 ""
+  "00_front_page.aux" 1698898221 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "00_front_page.tex" 1698898465 1129 8d3e9f0a6de1f0eb0b3a8a8f0c45d034 ""
+  (generated)
+  "00_front_page.aux"
+  "00_front_page.log"
+  "00_front_page.pdf"
+  (rewritten before read)
