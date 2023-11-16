@@ -91,7 +91,7 @@ The adaptation of the base game into a multiplayer environment necessitated the 
 
 For data serialization and transmission, we opted for JSON, owing to its widespread use and ease of integration with Python. The message classes were designed to encapsulate various types of game-related information, such as player positions, game state updates, and login requests/responses. The following code snippet provides an overview of these classes:
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 
 
 
@@ -241,7 +241,7 @@ The UDPServer class is built on the UDP protocol, prioritizing reduced latency o
 \paragraph{Client-Server Communication}
     Communication between the client and server is managed through custom message classes. These classes encode messages into JSON strings for network transmission. The code snippets for these custom classes are as follows:
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 
 class PacketClass:
     type = None
@@ -349,7 +349,7 @@ The Game State Class encompasses several key functions:
 \end{itemize}
 
 The code implementation for these functions is provided below:
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 
     
 class Game_State:
@@ -431,7 +431,7 @@ The client-side architecture of the project is centered around a primary class, 
 \end{itemize}
 
 Detailed code for the Main Connection Class and its associated functionalities will be provided in the final section of this document.
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 
     class UDPCon:
         s=None
@@ -526,20 +526,20 @@ Detailed code for the Main Connection Class and its associated functionalities w
 
 The client is initialized and connected to the server by sending a formatted connection message. The initial connection setup is as follows:
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 connector = UDPCon(host=host)
 porttemp = connector.sendConnMsg()
 \end{lstlisting}
 
 Once connected, the player logs into the game to receive their initial spawn location and ID, as detailed in the UDPCon class:
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 spawn_location = connector.login(username)
 \end{lstlisting}
 
 Subsequently, during each game cycle, the playerUpdate method in the connector is invoked, and player updates are sent to the server:
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 obj = DataPlayer([self.player.pos], self.player.angle, self.player.shot, self.player.health, self.player.shotWho)
 game_state_res = self.connector.playerUpdate(obj)
 \end{lstlisting}
@@ -571,7 +571,7 @@ The process involves these steps:
 
 The Server Finder utilizes network scanning tools, such as the `nmap` command, to identify active interfaces on the local network, enabling the effective location of the server. This approach ensures a seamless and automated process for clients to connect to the server within the local network.
 
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[style=pythonstyle]
 
 def find_all_ips():
     hostname = socket.gethostname()
@@ -600,7 +600,7 @@ Continuing with the Server Finder process, the system utilizes the previously id
 
 This mechanism ensures that clients within the network can automatically detect and connect to the server without manual input of the server's IP address and port. The process not only streamlines the connection setup but also adds a layer of dynamic interaction in network environments where server details might change or multiple servers might be present.
 
-\begin{lstlisting}[language=Python] 
+\begin{lstlisting}[style=pythonstyle]
 
 def find_server():
     file1 = open('ips.txt', 'r')
@@ -659,6 +659,604 @@ This project has yielded valuable insights into the design and implementation of
     \item In retrospect, exploring more advanced server discovery mechanisms could have further enhanced the project.
 \end{itemize}
 
-\newpage
+
+
+\section{source code}
+
+
+\begin{lstlisting}[style=pythonstyle, caption=msg classes code]
+    from settings import *
+    import json
+    
+    
+    
+    
+    class PacketClass:
+        type = None
+        msg = None
+        def __init__(self,type=None,msg=None):
+            self.type=type
+            self.msg=msg
+    
+    class LoginResMsg:
+        x=0
+        y=0
+        id=None
+        def __init__(self,x,y,id):
+            self.x=x
+            self.y=y
+            self.id=id
+        def getJson(self):
+            return json.dumps(self.__dict__)
+    
+    class JsonPacket:
+        type=None
+        msg=None
+        def __init__(self,type=None,msg=None):
+            if type :
+                # self.type=type
+                # self.msg=msg
+                self.type=type
+            # if msg:
+                if self.type!=LOGIN_REQ and self.type != UDP_CON_REQ:
+                    self.msg=json.loads(msg)
+                    # print(self.msg)
+                else:
+                    self.msg = msg
+        def udpConnReq(self):
+            self.type = UDP_CON_REQ
+            self.msg = None
+            return self.getJson()
+        def udpConnRes(self,socket):
+            self.type = UDP_CON_RES
+            self.msg = str(socket)
+            return self.getJson()
+        def loginReq(self,username):
+            self.type=LOGIN_REQ
+            self.msg=username
+            return self.getJson()
+        def loginRes(self,spawn):
+            self.type=LOGIN_RES
+            self.msg=spawn.getJson()
+            return self.getJson()
+        def playerUpdate(self,player):
+            self.type=PLAYER_UPDATE
+            self.msg=player.getJson()
+            return self.getJson()
+        def gameStateUpdate(self,game_state):
+            self.type=GAME_STATE
+            self.msg=game_state.getJson()
+            return self.getJson()
+        def getJson(self):
+            # print(json.dumps(self.__dict__))
+            return json.dumps(self.__dict__)
+    
+        
+    
+    
+    class DataPlayer:
+        position=[0,0]
+        yaw=0
+        shoot=False
+        health = None
+        shotWho=None
+        def __init__(self,position=[0,0],yaw=0,shoot=False,health=None,shotWho=None):
+            self.position=position
+            self.yaw=yaw
+            self.shoot=shoot
+            self.health=health
+            self.shotWho=shotWho
+        def update(self,position=[0,0],yaw=0,shoot=False):
+            self.position=position
+            self.yaw=yaw
+            self.shoot=shoot
+        def show(self):
+            print(self.__dict__)
+        def __str__(self):
+            return str(self.__dict__)
+        def getJson(self):
+            # print(self.__dict__)
+            return json.dumps(self.__dict__)
+    
+    
+    
+    \end{lstlisting}
+    \begin{lstlisting}[style=pythonstyle, caption=server game state class]
+
+class Game_State:
+running=False
+players={}
+# score=0
+map_obj=None
+
+def __init__(self,running=False,players={},map_obj=None):
+    self.running=running
+    self.players=players
+    self.map_obj=map_obj
+def get_players_json(self,id):
+    temp={}
+    for i , player in self.players.items():
+        temp[str(i)]=str(player.__dict__)
+    temp[str(-1)]=str(id)
+    return json.dumps(temp,indent=1)
+    
+
+def show(self,id =None):
+    print("Game State: ###########\n")
+    if id:
+        for i, player in self.players.items():
+            if i != id:
+                print(f"Player {i}: {player}") 
+    else:
+        for i, player in self.players.items():
+            
+            print(f"Player {i}: {player}")
+    print("############\n\n")
+    # for i in self.players:
+    # 	i.show()
+def getJson(self):
+    return json.dumps(self.players)
+        \end{lstlisting}
+
+        \begin{lstlisting}[style=pythonstyle, caption=server code UDP]
+            import os
+import sys
+print(os.getcwd())
+sys.path.insert(0, os.getcwd())
+import socket
+import json
+from render_handels.map import *
+from multiprocessing import Process, Manager, Lock
+from multiprocessing.managers import BaseManager
+from connection_handels.server_classes import *
+from server_finder import *
+import random
+import pickle
+from settings import * 
+
+import socket
+import threading
+
+
+class UDPMultiCliCon:
+    s=None
+    sendMsg=None
+    recvMsg=None
+    cliAddr=None
+    # gameState=None
+    playerId=None
+    host=HOST
+    restricted_area = {(i, j) for i in range(10) for j in range(10)}
+    def __init__(self,port=None,host=None,i=None,addr = None):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.s.settimeout(5.0)
+        self.cliAddr = addr
+        if host:
+            self.host = host
+        if port:
+            print("present",(self.host,port))
+            self.s.bind((self.host,port))
+        else:
+            self.s.bind((self.host, PORT))
+        self.playerId=i
+    def recieve(self):
+        print("data trying")
+        data = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+        print("data recieved ")
+        self.recvMsg = json.loads(data)
+        # print("DATA REC "+self.recvMsg["type"],self.recvMsg["msg"])
+        self.recvMsg=JsonPacket(self.recvMsg["type"],self.recvMsg["msg"])
+        return self.recvMsg
+    def loginAccepted(self,map_obj):
+        print("login acc in")
+        self.sendMsg=JsonPacket()
+        # x_spawn=random.randrange(1,map_obj.rows-1,1)
+        # y_spawn=random.randrange(1,map_obj.cols-1,1)
+        pos = x, y = random.randrange(map_obj.cols), random.randrange(map_obj.rows)
+        while (pos in map_obj.world_map) or (pos in self.restricted_area):
+            pos = x, y = random.randrange(map_obj.cols), random.randrange(map_obj.rows)
+        # x_spawn=1
+        # y_spawn=2
+        # print(x_spawn,y_spawn)
+        res= LoginResMsg(x,y,self.playerId)
+        self.sendMsg=self.sendMsg.loginRes(res)
+        print("login in sending "+self.sendMsg)
+        self.s.sendto(self.sendMsg.encode("utf-8"),self.cliAddr)
+
+        return
+    def playerUpdate(self,game_state):
+        self.sendMsg=JsonPacket()
+        self.sendMsg=self.sendMsg.gameStateUpdate(game_state)
+        self.s.sendto(self.sendMsg.encode("utf-8"),self.cliAddr)
+
+        return
+
+
+class UDPServerCon:
+    s=None
+    sendMsg=None
+    recvMsg=None
+    cliAddr = None
+    host = None
+    def __init__(self,port=None,host=None):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        if host:
+            self.host = host
+        if port:
+            self.s.bind((self.host,port))
+        else:
+            self.s.bind((self.host, PORT))
+    def accMsg(self):
+        self.recvMsg , self.cliAddr = self.s.recvfrom(RECIEVE_BUFFER_SIZE)
+        self.recvMsg = json.loads(self.recvMsg)
+        print("DATA REC "+self.recvMsg["type"],self.recvMsg["msg"])
+        self.recvMsg=JsonPacket(self.recvMsg["type"],self.recvMsg["msg"])
+        if self.recvMsg.type != UDP_CON_REQ:
+            return None,None
+        return self.recvMsg,self.cliAddr
+
+    def sendConnMsg(self,cliPort):
+        self.sendMsg=JsonPacket()
+        self.sendMsg=self.sendMsg.udpConnRes(cliPort)
+        self.s.sendto(self.sendMsg.encode("utf-8"), self.cliAddr)
+
+
+
+class UDPServer:
+    i=0
+    map_obj=Map(None)
+    map_obj.get_map()
+    game_state=Game_State(map_obj=map_obj)
+    i=0
+    def __init__(self):
+        self.client_handlers = {}
+        self.main_connector = UDPServerCon(host=my_ip())
+        self.next_available_port = PORT + 1
+    def assignPort(self):
+        client_port = self.next_available_port
+        self.next_available_port += 1
+        return client_port
+
+    def start(self):
+        print("UDP Server started. Waiting for clients...")
+        while True:
+            data, addr = self.main_connector.accMsg()
+
+            if data:
+                # Assign a new port for this client
+                com_port = self.assignPort()
+                
+                # Start a new thread for this client
+                client_thread = threading.Thread(target=self.handle_client, args=(addr, com_port,self.i))
+                self.client_handlers[addr] = [client_thread,com_port]
+                client_thread.start()
+                
+                # Inform the client about their unique port
+                self.main_connector.sendConnMsg(com_port)
+                self.i +=1        
+
+    def handle_client(self, client_addr, com_port,i):
+        # Create a new socket for this client
+        print(f"Handling client {client_addr} {com_port}")
+        print(my_ip())
+        connector = UDPMultiCliCon(com_port,my_ip(),i,client_addr)
+        
+
+        while True:
+            self.game_state.show()
+
+            try:
+                recv =connector.recieve()
+                # print(recv)
+                # print("something")
+                if not recv:  # connection is closed by client
+                    print(f"Connection closed by {addr}")
+                    connector.s.close()
+                    del self.game_state.players[i]
+                    break
+                if recv.type == LOGIN_REQ:
+                    connector.loginAccepted(self.map_obj)
+                    print(recv.msg + " has joined the game")
+                elif recv.type == PLAYER_UPDATE:
+                    # print("-------",str(com_port),recv.msg,"-------")
+                    if i in self.game_state.players:
+                        self.game_state.players[i]["position"] = recv.msg["position"]
+                        self.game_state.players[i]["yaw"] = recv.msg["yaw"]
+                        self.game_state.players[i]["shoot"] = recv.msg["shoot"]
+                        if int(recv.msg["health"]) == int(self.game_state.players[i]["health"])+1:
+                            self.game_state.players[i]["health"] = recv.msg["health"]
+                    else:
+                        self.game_state.players[i] = recv.msg
+
+                            
+                        # self.game_state.players[i] = recv.msg
+                    hurtPlayerId= recv.msg["shotWho"]
+                    if hurtPlayerId != None:
+                        print("SHOT "+str(hurtPlayerId))
+                        print("init health : "+str(self.game_state.players[int(hurtPlayerId)]["health"]))
+                        self.game_state.players[int(hurtPlayerId)]["health"]=int(self.game_state.players[int(hurtPlayerId)]["health"])-WEAPON_DAMAGE
+                        self.game_state.players[i]["shotWho"]=None
+                        print(self.game_state.players[int(hurtPlayerId)]["health"])
+                    # print(recv.msg)
+                    connector.playerUpdate(self.game_state)
+            except Exception as e:
+                print("exception : "+str(e))
+                connector.s.close()
+                if i in self.game_state.players:
+                    del self.game_state.players[i]
+                break
+            # Process data
+
+
+udp_server = UDPServer()
+udp_server.start()
+
+
+
+
+        \end{lstlisting}
+
+        \begin{lstlisting}[style=pythonstyle, caption=client communication classes]
+
+class UDPCon:
+    s=None
+    sendMsg=None
+    revMsg=None
+    cliAddr = None
+    port = None
+    host=HOST
+    def __init__(self,host=None,port=None):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.s.settimeout(0.5)
+        if host:
+            self.host=host
+    def accMsg(self):
+        self.revMsg , self.cliAddr = self.s.recvfrom(RECIEVE_BUFFER_SIZE)
+        self.revMsg = json.loads(self.revMsg)
+        print("DATA REC "+self.recvMsg["type"],self.recvMsg["msg"])
+        self.recvMsg=JsonPacket(self.recvMsg["type"],self.recvMsg["msg"])
+        if self.recvMsg.type != UDP_CON_REQ:
+            return None,None
+        return self.recvMsg,self.cliAddr
+
+    def sendConnMsg(self):
+        self.sendMsg=JsonPacket()
+        self.sendMsg=self.sendMsg.udpConnReq()
+        sent =False
+        while not sent:
+            try:
+                self.s.sendto(self.sendMsg.encode("utf-8"), (self.host,PORT))
+                self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+                sent = True
+            except Exception as e:
+
+                print(e)
+                sent = False
+                continue
+        self.revMsg = json.loads(self.revMsg)
+        print("DATA REC "+self.revMsg["type"],self.revMsg["msg"])
+        return int(self.revMsg["msg"])
+        # return 7001
+    def login(self,username):
+        
+        print(self.host,self.port)
+
+        self.sendMsg=JsonPacket()
+        self.sendMsg=self.sendMsg.loginReq(username)
+        sent = False
+        while not sent:
+            try:
+        # sleep(0.5)
+                self.s.sendto(self.sendMsg.encode("utf-8"), (self.host,self.port))
+            # except timeout of socket
+                
+        
+                self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+                sent = True
+            except Exception as e:
+                print(e)
+                sent = False
+
+
+        print(self.revMsg)
+        self.revMsg = json.loads(self.revMsg)
+        self.revMsg=JsonPacket(self.revMsg["type"],self.revMsg["msg"])
+        # print([int(self.revMsg.msg['x']),int(self.revMsg.msg['y']),int(self.revMsg.msg['id'])])
+        return [int(self.revMsg.msg["x"]),int(self.revMsg.msg["y"]),int(self.revMsg.msg["id"])]
+    def playerUpdate(self,player):
+        self.sendMsg=JsonPacket()
+        self.sendMsg=self.sendMsg.playerUpdate(player)
+
+        sent = False
+        while not sent:
+            try:
+
+                self.s.sendto(self.sendMsg.encode("utf-8"),(self.host,self.port))
+                self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
+                sent = True
+            except Exception as e:
+                print(e)
+                sent = False
+                continue
+        
+
+
+        print(self.revMsg)
+        self.revMsg = json.loads(self.revMsg)
+        self.revMsg = JsonPacket(self.revMsg["type"], self.revMsg["msg"])
+        return self.revMsg
+
+
+class ClientCon:
+    s=None
+    sendMsg = None
+    revMsg = None
+    def __init__(self):
+        self.s = socket.socket()
+        self.s.connect((HOST, PORT))
+    def login(self):
+        self.sendMsg=PacketClass(type=LOGIN_REQ)
+        self.sendMsg = pickle.dumps(self.sendMsg)
+        self.s.send(self.sendMsg)
+        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
+        self.revMsg = pickle.loads(self.revMsg)
+        return [self.revMsg.msg.x,self.revMsg.msg.y,self.revMsg.msg.id]
+    def playerUpdate(self,obj):
+        self.sendMsg=PacketClass(type=PLAYER_UPDATE)
+        self.sendMsg.msg = obj
+        self.sendMsg = pickle.dumps(self.sendMsg)
+        self.s.send(self.sendMsg)
+        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
+        self.revMsg = pickle.loads(self.revMsg)
+        return self.revMsg.msg
+
+class ClientJsonCon:
+    s=None
+    sendMsg = None
+    revMsg = None
+    def __init__(self):
+        self.s = socket.socket()
+        self.s.connect((HOST, PORT))
+    def login(self,username):
+        self.sendMsg=JsonPacket()
+        self.sendMsg=self.sendMsg.loginReq(username)
+        self.s.send(self.sendMsg.encode("utf-8"))
+
+        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
+        self.revMsg = json.loads(self.revMsg)
+        self.revMsg=JsonPacket(self.revMsg["type"],self.revMsg["msg"])
+        # print([int(self.revMsg.msg['x']),int(self.revMsg.msg['y']),int(self.revMsg.msg['id'])])
+        return [int(self.revMsg.msg["x"]),int(self.revMsg.msg["y"]),int(self.revMsg.msg["id"])]
+    def playerUpdate(self,player):
+        self.sendMsg=JsonPacket()
+        self.sendMsg=self.sendMsg.playerUpdate(player)
+        self.s.send(self.sendMsg.encode("utf-8"))
+
+        self.revMsg = self.s.recv(RECIEVE_BUFFER_SIZE)
+        # print(self.revMsg)
+        self.revMsg = json.loads(self.revMsg)
+        self.revMsg = JsonPacket(self.revMsg["type"], self.revMsg["msg"])
+        return self.revMsg
+
+        
+
+        \end{lstlisting}
+        \begin{lstlisting}[style=pythonstyle, caption=client code]
+            if __name__ == '__main__':
+    # init_new_game()
+    username=(LoginState().run())
+    find_all_ips()
+    host = find_server()
+    print(username,host)
+    connector = UDPCon(host=host)
+    porttemp = connector.sendConnMsg()
+    print(porttemp)
+    connector.port= porttemp
+    spawn_location= connector.login(username)
+    # spawn_location= connector.login(username)
+
+    print("---Connected to server---")
+
+    # spawn_location = connector.login()
+    
+    # spawn_location = connector.login(username)
+    # global playerId 
+    playerId= spawn_location[2]
+    print("spawn location: ",spawn_location)
+    game = Game(connector,spawn_location[0],spawn_location[1])
+    # game = Game(1,1)
+
+    game.run()
+
+
+
+----- updation code  ---------
+    obj=DataPlayer([self.player.pos],self.player.angle,self.player.shot,self.player.health,self.player.shotWho)
+    
+        game_state_res=self.connector.playerUpdate(obj)
+            \end{lstlisting}
+            \begin{lstlisting}[style=pythonstyle, caption=server finder]
+                import os
+                from settings import *
+                import socket
+                # Using readlines()
+                
+                def my_ip():
+                    hostname = socket.gethostname()
+                    IPAddr = socket.gethostbyname(hostname)
+                    print(IPAddr)
+                    return IPAddr
+                
+                def find_all_ips():
+                    hostname = socket.gethostname()
+                    IPAddr = socket.gethostbyname(hostname)
+                
+                    
+                    print("Your Computer Name is:" + hostname)
+                    print("Your Computer IP Address is:" + IPAddr)
+                    secs=IPAddr.split(".")
+                    netId= ""
+                    for i in range(len(secs)-1):
+                        netId+= secs[i]+"."
+                    netId+="0"
+                    print(netId)
+                    
+                    os.system("nmap -n -sn "+netId+"/24 -oG - | awk '/Up$/{print $2}' > ips.txt")
+                    # os.system("nmap -n -sn 172.16.59.0/24 -oG - | awk '/Up$/{print $2}' ")
+                
+                
+                def find_server():
+                    file1 = open('ips.txt', 'r')
+                    Lines = file1.readlines()
+                    
+                    count = 0
+                
+                    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    s.settimeout(FINDER_TIMEOUT)
+                    line =None
+                    # Strips the newline character
+                    for line in Lines:
+                        try:
+                        # print("-"+line[:-1]+"-")
+                            s.sendto("server?".encode("utf-8"), (line[:-1],SERVER_FINDER_PORT))
+                            revMsg , cliAddr = s.recvfrom(RECIEVE_BUFFER_SIZE)
+                            if revMsg:
+                                print("request -> "+line+ "\nresponse -> " +revMsg.decode())
+                                break
+                            # os.system("ping "+line+" "+str(SERVER_FINDER_PORT))
+                            count += 1
+                        except Exception as e:
+                            print(e)
+                            continue
+                    if line:
+                        return line[:-1]
+                    else:
+                        return HOST
+                
+            \end{lstlisting}
+            \begin{lstlisting}[style=pythonstyle, caption=server assigner]
+                import socket
+                import string
+                from settings import *
+                hostname = socket.gethostname()
+                IPAddr = socket.gethostbyname(hostname)
+                
+                 
+                print("Your Computer Name is:" + hostname)
+                print("Your Computer IP Address is:" + IPAddr)
+                
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.bind((IPAddr,SERVER_FINDER_PORT))
+                while(True):
+                    recvMsg , cliAddr = s.recvfrom(RECIEVE_BUFFER_SIZE)
+                
+                    if recvMsg.decode() == "server?":
+                        print("req")
+                
+                        s.sendto("yes".encode("utf-8"), cliAddr)
+                
+                \end{lstlisting}
+
+        \newpage
 
 Further work on this project could involve the integration of WebSockets to enable internet-based gameplay, expanding the game's reach beyond local networks. This would involve tackling additional challenges related to broader network variability and security considerations.

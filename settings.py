@@ -61,3 +61,15 @@ UDP_CON_RES ="udp connection request"
 WEAPON_DAMAGE = 50
 
 FINDER_TIMEOUT=0.1
+
+WIFI = 'wlp3s0'
+LOOPBACK = 'lo'
+ETHERNET_1 = 'enp2s0'
+ETHERNET_2 = 'eth0'
+
+
+
+
+
+INTERFACE = WIFI
+

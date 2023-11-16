@@ -37,8 +37,9 @@ class UDPCon:
                 self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
                 sent = True
             except Exception as e:
-
+                print("end connecion error")
                 print(e)
+                print("retrying ....\n")
                 sent = False
                 continue
         self.revMsg = json.loads(self.revMsg)
@@ -62,7 +63,9 @@ class UDPCon:
                 self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
                 sent = True
             except Exception as e:
+                print("login error")
                 print(e)
+                print("retrying ....\n")
                 sent = False
 
 
@@ -83,13 +86,15 @@ class UDPCon:
                 self.revMsg = self.s.recvfrom(RECIEVE_BUFFER_SIZE)[0]
                 sent = True
             except Exception as e:
+                print("error sending player update")
                 print(e)
+                print("retrying ....\n")
                 sent = False
                 continue
         
 
 
-        print(self.revMsg)
+        # print(self.revMsg)
         self.revMsg = json.loads(self.revMsg)
         self.revMsg = JsonPacket(self.revMsg["type"], self.revMsg["msg"])
         return self.revMsg
