@@ -1,7 +1,0 @@
-PWD /home/manu/Desktop/LATEX_REPORT_TEMPLATE/Mini project report template/sections
-INPUT /etc/texmf/web2c/texmf.cnf
-INPUT /usr/share/texmf/web2c/texmf.cnf
-INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
-INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT 00_front_page.tex
-OUTPUT 00_front_page.log
