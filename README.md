@@ -79,8 +79,5 @@ DOOM64 ONLINE
 
 ```
 
-## References 
 
-- As this project was majorly focusing on computer network side of things the resources for the GUI were referenced from this public github repo.
-  [ https://github.com/StanislavPetrovV/DOOM-style-Game ] 
 
