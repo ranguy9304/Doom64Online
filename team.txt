@@ -1,3 +1,0 @@
-Rudra -> server , player , pathfinder , npc 
-shreyash -> object_renderer, map , object_handler , main ( client connection )
-harshit -> raycasting , setting , sound , weapon , main ( client data parser ) , sprite_object
